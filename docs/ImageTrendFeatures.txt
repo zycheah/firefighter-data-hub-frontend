@@ -1,0 +1,12 @@
+1. NFIRS/NERIS compliant tools for fire event documentation.
+2. Dashboards, performance monitoring, trend analysis.
+3. Create and share tailored insights without coding
+4. Enter data offline on tablets and sync later
+5. Configurable reporting tools
+6. Inspection management features
+7. Centralized data collection
+8. Elite Fire offers powerful features your department needs to optimize reporting, manage operational data, and ensure compliance with evolving standards.
+9. Reduce manual entry and save time with tools that convert data to match your fire department’s reporting needs. Ensure consistent, reliable fire documentation for every incident.
+10. Control fields, value ranges, and validation settings for accurate fire data import/export.
+11. Access user-created forms and workflows shared by other fire departments in the Library.
+12. Complete building inspections or preplans offline with Elite Field Inspections™. Data is stored securely and syncs automatically once an internet connection is available.

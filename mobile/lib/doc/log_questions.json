@@ -1,0 +1,6 @@
+[
+    {
+        "question": "Did you participate in the Incident recently?",
+        "expected_answer_promt": "If User respose with Yes,"
+    }
+]

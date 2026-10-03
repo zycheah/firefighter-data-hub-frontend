@@ -1,0 +1,29 @@
+# OS / editors
+.DS_Store
+.idea/
+*.iml
+
+# Secrets (also covered by each app's own .gitignore)
+.env
+.env.*
+!.env.example
+*.pem
+*.jks
+*.keystore
+key.properties
+local.properties
+
+# Web build
+web/node_modules/
+web/dist/
+
+# Flutter build
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins-dependencies
+mobile/android/.gradle/
+mobile/android/.kotlin/
+mobile/ios/Pods/
+mobile/ios/Flutter/ephemeral/
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/flutter_export_environment.sh
