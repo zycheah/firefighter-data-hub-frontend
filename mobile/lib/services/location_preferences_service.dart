@@ -14,13 +14,13 @@ class LocationPreferencesService {
   static const _exportIntervalMinutesKey = 'location_export_interval_minutes';
   static const _lastLocationExportMsKey = 'last_location_export_ms';
 
-  /// Default settings: tracking enabled, every 20 minutes.
-  static const int defaultTrackingIntervalMinutes = 20;
+  /// Default settings: tracking enabled, every minute.
+  static const int defaultTrackingIntervalMinutes = 1;
   static const bool defaultTrackingEnabled = true;
 
   /// Default batched export to backend while the foreground service runs.
   /// *********************************************************************************
-  static const int defaultExportIntervalMinutes = 120+5;
+  static const int defaultExportIntervalMinutes = 15;
 
   Future<bool> getIsTrackingEnabled() async {
     final prefs = await SharedPreferences.getInstance();
