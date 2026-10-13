@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
@@ -33,7 +34,7 @@ class SettingsPageState extends State<SettingsPage>
   int _trackingIntervalMinutes =
       LocationPreferencesService.defaultTrackingIntervalMinutes;
 
-  final List<int> _intervalOptions = [15, 20, 30, 60, 120];
+  final List<int> _intervalOptions = [1, 5, 15, 20, 30, 60, 120];
 
   @override
   void initState() {
@@ -91,12 +92,19 @@ class SettingsPageState extends State<SettingsPage>
     });
   }
 
+  /// Re-reads the OS location permission.
+  Future<void> refreshLocationPermissionState() async {
+    if (!mounted) return;
+    await _loadPreferences();
+  }
+
   Future<void> _loadPreferences() async {
     final prefs = LocationPreferencesService();
     final interval = await prefs.getTrackingIntervalMinutes();
     final always = await LocationService().hasAllTheTimeLocationAccess();
     final anyFg = await LocationService().hasAnyLocationPermission();
 
+    if (!mounted) return;
     setState(() {
       _trackingIntervalMinutes = interval;
       _allTheTimeLocationEnabled = always;
@@ -127,19 +135,45 @@ class SettingsPageState extends State<SettingsPage>
       _anyForegroundLocationGranted = anyFg;
     });
     if (!mounted) return;
+    if (!always) {
+      await _offerOpenSystemLocationSettings();
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
-          always
-              ? 'All-the-time location is on. Periodic tracking can run in the background.'
-              : 'All-the-time location is still off. On iOS choose Always; on Android allow '
-                  'location all the time, or change it in system Settings.',
+          'All-the-time location is on. Periodic tracking can run in the background.',
         ),
       ),
     );
-    if (always) {
-      await LocationBackgroundService()
-          .syncSchedulingFromPreferencesIfAllTheTimeAccess();
+    await LocationBackgroundService()
+        .syncSchedulingFromPreferencesIfAllTheTimeAccess();
+  }
+
+  /// The OS shows its "Always" prompt only once; afterwards use system Settings.
+  Future<void> _offerOpenSystemLocationSettings() async {
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Allow location all the time'),
+        content: const Text(
+          'All-the-time location is still off. Open Settings, tap Location, '
+          'then choose Always (iOS) or Allow all the time (Android).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+    if (open == true) {
+      await openAppSettings();
     }
   }
 
