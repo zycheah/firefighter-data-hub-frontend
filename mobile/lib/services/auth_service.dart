@@ -10,6 +10,7 @@ import 'dart:math';
 
 import '../config/app_config.dart' as app_config;
 import 'ppe_is_updated_storage.dart';
+import 'tracking_diagnostics.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -22,6 +23,7 @@ class AuthService {
 
   static const String _accessTokenKey = 'access_token';
   static const String _userKeyKey = 'user_key';
+  static const String _accessTokenObtainedMsKey = 'access_token_obtained_ms';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
@@ -32,11 +34,16 @@ class AuthService {
   final Map<String, User> _users = {};
 
   Future<String?>? _refreshInFlight;
+  DateTime? _lastRenewAttemptAt;
 
   String? get lastAuthError => _lastAuthError;
 
   Future<void> _persistAccessToken(String token) async {
     await _secureStorage.write(key: _accessTokenKey, value: token);
+    await _secureStorage.write(
+      key: _accessTokenObtainedMsKey,
+      value: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
   }
 
   Future<void> applyNewAccessToken(String token) async {
@@ -51,6 +58,7 @@ class AuthService {
 
   Future<void> _clearStoredAccessToken() async {
     await _secureStorage.delete(key: _accessTokenKey);
+    await _secureStorage.delete(key: _accessTokenObtainedMsKey);
   }
 
   Future<void> _persistUserKey(String userKey) async {
@@ -315,6 +323,64 @@ class AuthService {
     unawaited(clearPendingIsPpeUpdated());
   }
 
+  /// Drops the rejected token but keeps the user key, so capture continues.
+  void _expireSession() {
+    TrackingDiagnostics.log('session expired');
+    _currentUser = null;
+    _accessToken = null;
+
+    unawaited(_clearStoredAccessToken());
+  }
+
+  /// True when a known user has no valid session.
+  Future<bool> needsSignIn() async {
+    if (await getUserKey() == null) return false;
+    return await _getUsableAccessToken() == null;
+  }
+
+  /// Renews the token at half its lifetime; the server rejects expired tokens.
+  Future<void> renewSessionIfStale() async {
+    final token = await _getUsableAccessToken();
+    if (token == null) return;
+
+    final now = DateTime.now();
+    final lastAttempt = _lastRenewAttemptAt;
+    if (lastAttempt != null &&
+        now.difference(lastAttempt) < const Duration(minutes: 10)) {
+      return;
+    }
+
+    final expiresAt = _tokenExpiry(token);
+    final obtainedMs = int.tryParse(
+      await _secureStorage.read(key: _accessTokenObtainedMsKey) ?? '',
+    );
+    if (expiresAt != null && obtainedMs != null) {
+      final obtainedAt = DateTime.fromMillisecondsSinceEpoch(obtainedMs);
+      final halfLife = expiresAt.difference(obtainedAt) ~/ 2;
+      if (now.isBefore(obtainedAt.add(halfLife))) return;
+    }
+
+    _lastRenewAttemptAt = now;
+    final renewed = await refreshAccessToken();
+    TrackingDiagnostics.log('session renewal ok=${renewed != null}');
+  }
+
+  /// Reads the `exp` claim of a JWT without verifying it.
+  DateTime? _tokenExpiry(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
+      final exp = payload is Map<String, dynamic> ? payload['exp'] : null;
+      if (exp is! num) return null;
+      return DateTime.fromMillisecondsSinceEpoch((exp * 1000).round());
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<String?> refreshAccessToken() async {
     if (_refreshInFlight != null) {
       return await _refreshInFlight;
@@ -377,7 +443,7 @@ class AuthService {
 
         if (isDefinitiveAuthFailure(sc)) {
           debugPrint('[AuthService] refresh auth failure ($sc)');
-          logout();
+          _expireSession();
           return null;
         }
 
@@ -712,10 +778,20 @@ class AuthService {
     _accessToken = storedToken;
 
     final meUrl = Uri.parse('${app_config.AppConfig.authEndpoint}/me');
-    final meResponse = await authorizedGet(meUrl);
+    final http.Response meResponse;
+    try {
+      meResponse = await authorizedGet(meUrl).timeout(_httpTimeout);
+    } catch (_) {
+      // Offline: keep the session for the next launch.
+      return false;
+    }
+
+    if (meResponse.statusCode == 401 || meResponse.statusCode == 403) {
+      _expireSession();
+      return false;
+    }
 
     if (meResponse.statusCode != 200) {
-      logout();
       return false;
     }
 

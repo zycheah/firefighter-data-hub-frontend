@@ -9,9 +9,11 @@ import 'services/auth_service.dart';
 import 'services/consent_preferences_service.dart';
 import 'services/location_background_service.dart';
 import 'services/location_preferences_service.dart';
+import 'services/tracking_diagnostics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  TrackingDiagnostics.log('app start');
 
   // Mobile-only background services.
   // Skip these on web so Chrome can render the UI.
@@ -86,11 +88,12 @@ class _SessionStartupState extends State<_SessionStartup> {
     });
 
     final ok = await AuthService().tryRehydrateSession();
+    TrackingDiagnostics.log('session restored=$ok');
 
     if (!mounted) return;
 
-    // Only allow tracking to (re)start when authenticated.
-    if (ok && !kIsWeb) {
+    // Also track for a known user whose session expired; points upload after sign-in.
+    if (!kIsWeb && (ok || await AuthService().getUserKey() != null)) {
       await LocationBackgroundService().resyncTrackingFromPreferences();
     }
 
