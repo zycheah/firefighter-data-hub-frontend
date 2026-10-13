@@ -11,6 +11,7 @@ import 'location_preferences_service.dart';
 import 'location_service.dart';
 import 'location_storage_service.dart';
 import 'location_sync_service.dart';
+import 'tracking_diagnostics.dart';
 
 /// Top-level callback for [FlutterForegroundTask.startService]. Must stay top-level.
 @pragma('vm:entry-point')
@@ -24,8 +25,9 @@ class LocationTrackingTaskHandler extends TaskHandler {
   late DateTime _lastExportAt;
 
   Future<void> _runCaptureAndMaybeExport() async {
-    await LocationService()
-        .captureAndStoreCurrentLocation(allowRequestPermission: false);
+    await LocationService().captureAndStoreCurrentLocation(
+      allowRequestPermission: false,
+    );
 
     final prefs = LocationPreferencesService();
     final exportIntervalMinutes = await prefs.getExportIntervalMinutes();
@@ -87,8 +89,17 @@ class LocationBackgroundService {
       'Recording your location for safety monitoring';
 
   Timer? _foregroundOnlyTimer;
+  Duration? _foregroundOnlyInterval;
   bool _foregroundOnlyRunInProgress = false;
   DateTime? _foregroundOnlyLastExportAt;
+  DateTime? _foregroundOnlyLastExportAttemptAt;
+  bool _foregroundOnlyExportInProgress = false;
+
+  /// iOS only: an active background position stream keeps the app, and so the
+  /// capture timer, running while it is not on screen.
+  StreamSubscription<Position>? _iosKeepAliveSubscription;
+  Position? _iosKeepAlivePosition;
+  int _iosKeepAliveEventCount = 0;
 
   /// Initializes [FlutterForegroundTask] static options (safe to call repeatedly).
   static void applyForegroundTaskInit(int intervalMinutes) {
@@ -127,15 +138,13 @@ class LocationBackgroundService {
       return;
     }
 
-    await updateScheduling(
-      isEnabled: true,
-      intervalMinutes: intervalMinutes,
-    );
+    await updateScheduling(isEnabled: true, intervalMinutes: intervalMinutes);
   }
 
   /// Resyncs tracking based on current preferences and OS permission state.
   ///
-  /// - If permission is **Always**, uses the foreground-task scheduler (works while app is closed).
+  /// - If permission is **Always**, uses the foreground-task scheduler on Android and a
+  ///   background position stream plus timer on iOS.
   /// - If permission is **While In Use**, runs a foreground-only periodic capture loop (app open).
   /// - If permission is denied/restricted, stops any running tracking.
   Future<void> resyncTrackingFromPreferences() async {
@@ -145,7 +154,9 @@ class LocationBackgroundService {
     await prefs.getExportIntervalMinutes();
 
     if (!isEnabled) {
-      debugPrint('[LocationBackgroundService] tracking disabled by preference.');
+      debugPrint(
+        '[LocationBackgroundService] tracking disabled by preference.',
+      );
       await stopForegroundOnlyTracking();
       await _stopForegroundServiceIfRunning();
       return;
@@ -159,9 +170,13 @@ class LocationBackgroundService {
 
     final permission = await Geolocator.checkPermission();
     debugPrint('[LocationBackgroundService] permission: $permission');
+    TrackingDiagnostics.log('resync permission=${permission.name}');
 
     if (permission == LocationPermission.always) {
-      await stopForegroundOnlyTracking();
+      // On iOS the timer and keep-alive stream are the tracking mechanism.
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        await stopForegroundOnlyTracking();
+      }
       await updateScheduling(isEnabled: true, intervalMinutes: intervalMinutes);
       return;
     }
@@ -207,6 +222,16 @@ class LocationBackgroundService {
       return;
     }
 
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // iOS suspends the foreground-task scheduler; use the keep-alive stream.
+      await _stopForegroundServiceIfRunning();
+      await startForegroundOnlyTracking(
+        intervalMinutes: intervalMinutes,
+        keepAliveInBackground: true,
+      );
+      return;
+    }
+
     await _ensureAndroidNotificationPermission();
 
     final running = await FlutterForegroundTask.isRunningService;
@@ -247,10 +272,7 @@ class LocationBackgroundService {
     final isEnabled = await prefs.getIsTrackingEnabled();
     final interval = await prefs.getTrackingIntervalMinutes();
     await prefs.getExportIntervalMinutes();
-    await updateScheduling(
-      isEnabled: isEnabled,
-      intervalMinutes: interval,
-    );
+    await updateScheduling(isEnabled: isEnabled, intervalMinutes: interval);
   }
 
   /// Starts foreground location tracking if the tracking preference is enabled.
@@ -259,10 +281,7 @@ class LocationBackgroundService {
     if (!await prefs.getIsTrackingEnabled()) return;
     final intervalMinutes = await prefs.getTrackingIntervalMinutes();
     await prefs.getExportIntervalMinutes();
-    await updateScheduling(
-      isEnabled: true,
-      intervalMinutes: intervalMinutes,
-    );
+    await updateScheduling(isEnabled: true, intervalMinutes: intervalMinutes);
   }
 
   /// Stops the foreground location service (capture and export stop with it).
@@ -271,16 +290,38 @@ class LocationBackgroundService {
     await _stopForegroundServiceIfRunning();
   }
 
+  /// Periodic capture on a UI-isolate timer; [keepAliveInBackground] keeps it
+  /// running on iOS while the app is not on screen.
   Future<void> startForegroundOnlyTracking({
     required int intervalMinutes,
+    bool keepAliveInBackground = false,
   }) async {
     final interval = Duration(minutes: intervalMinutes.clamp(1, 24 * 60));
+
+    // Already running with the same settings: keep the current schedule.
+    if (_foregroundOnlyTimer != null &&
+        _foregroundOnlyInterval == interval &&
+        (_iosKeepAliveSubscription != null) == keepAliveInBackground) {
+      return;
+    }
+    _foregroundOnlyInterval = interval;
+    TrackingDiagnostics.log(
+      'tracking start interval=${interval.inMinutes}m '
+      'keepAlive=$keepAliveInBackground',
+    );
+
     debugPrint(
       '[LocationBackgroundService] starting foreground-only tracking '
       '(every ${interval.inMinutes}m)',
     );
 
     _foregroundOnlyTimer?.cancel();
+
+    if (keepAliveInBackground) {
+      _startIosKeepAliveStream();
+    } else {
+      await _stopIosKeepAliveStream();
+    }
 
     final prefs = LocationPreferencesService();
     final persisted = await prefs.getLastLocationExportMs();
@@ -303,40 +344,114 @@ class LocationBackgroundService {
     _foregroundOnlyTimer = Timer.periodic(interval, (_) => unawaited(tick()));
   }
 
+  void _startIosKeepAliveStream() {
+    if (_iosKeepAliveSubscription != null) return;
+    TrackingDiagnostics.log('keep-alive stream start');
+    _iosKeepAliveSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: AppleSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 0,
+            activityType: ActivityType.other,
+            pauseLocationUpdatesAutomatically: false,
+            allowBackgroundLocationUpdates: true,
+            showBackgroundLocationIndicator: true,
+          ),
+        ).listen(
+          (position) {
+            _iosKeepAlivePosition = position;
+            _iosKeepAliveEventCount++;
+          },
+          onError: (Object e) {
+            debugPrint(
+              '[LocationBackgroundService] keep-alive stream error: $e',
+            );
+            _iosKeepAlivePosition = null;
+            TrackingDiagnostics.log('keep-alive stream error: $e');
+          },
+          onDone: () => TrackingDiagnostics.log('keep-alive stream ended'),
+        );
+  }
+
+  Future<void> _stopIosKeepAliveStream() async {
+    if (_iosKeepAliveSubscription != null) {
+      TrackingDiagnostics.log('keep-alive stream stop');
+    }
+    await _iosKeepAliveSubscription?.cancel();
+    _iosKeepAliveSubscription = null;
+    _iosKeepAlivePosition = null;
+  }
+
+  /// Stops a timer-only loop; one backed by the keep-alive stream keeps running.
+  Future<void> onAppLeftForeground() async {
+    TrackingDiagnostics.log(
+      'left foreground keepAlive=${_iosKeepAliveSubscription != null}',
+    );
+    if (_iosKeepAliveSubscription != null) return;
+    await stopForegroundOnlyTracking();
+  }
+
   Future<void> stopForegroundOnlyTracking() async {
+    await _stopIosKeepAliveStream();
     if (_foregroundOnlyTimer == null) return;
     debugPrint('[LocationBackgroundService] stopping foreground-only tracking');
+    TrackingDiagnostics.log('tracking stop');
     _foregroundOnlyTimer?.cancel();
     _foregroundOnlyTimer = null;
+    _foregroundOnlyInterval = null;
     _foregroundOnlyRunInProgress = false;
   }
 
   Future<void> _runCaptureAndMaybeExportForegroundOnly() async {
-    await LocationService()
-        .captureAndStoreCurrentLocation(allowRequestPermission: false);
-
-    final prefs = LocationPreferencesService();
-    final exportIntervalMinutes = await prefs.getExportIntervalMinutes();
-    final now = DateTime.now();
-    final last = _foregroundOnlyLastExportAt ?? now;
-    if (now.difference(last) < Duration(minutes: exportIntervalMinutes)) {
-      return;
+    // Prefer the latest fix from the keep-alive stream.
+    final streamed = _iosKeepAlivePosition;
+    final bool stored;
+    if (streamed != null) {
+      stored = await LocationService().storePosition(streamed);
+    } else {
+      stored = await LocationService().captureAndStoreCurrentLocation(
+        allowRequestPermission: false,
+      );
     }
+    TrackingDiagnostics.log(
+      'tick stored=$stored source=${streamed != null ? 'stream' : 'oneshot'} '
+      'streamEvents=$_iosKeepAliveEventCount',
+    );
+    _iosKeepAliveEventCount = 0;
 
-    final userKey = await AuthService().getUserKey();
-    if (userKey == null) return;
+    // Network work runs separately so it never delays the next capture.
+    unawaited(AuthService().renewSessionIfStale());
+    unawaited(_maybeExportForegroundOnly());
+  }
 
-    final storage = LocationStorageService();
-    final before = await storage.getAllEntries(userKey: userKey);
-    if (before.isEmpty) return;
+  Future<void> _maybeExportForegroundOnly() async {
+    if (_foregroundOnlyExportInProgress) return;
+    _foregroundOnlyExportInProgress = true;
+    try {
+      final prefs = LocationPreferencesService();
+      final exportIntervalMinutes = await prefs.getExportIntervalMinutes();
+      final now = DateTime.now();
+      final last = _foregroundOnlyLastExportAt ?? now;
+      if (now.difference(last) < Duration(minutes: exportIntervalMinutes)) {
+        return;
+      }
 
-    await LocationSyncService().exportAllAndClearOnSuccess();
+      // After a failed upload, wait before trying again.
+      final lastAttempt = _foregroundOnlyLastExportAttemptAt;
+      if (lastAttempt != null &&
+          now.difference(lastAttempt) < const Duration(minutes: 5)) {
+        return;
+      }
+      _foregroundOnlyLastExportAttemptAt = now;
 
-    final after = await storage.getAllEntries(userKey: userKey);
-    if (after.isEmpty) {
-      final successAt = DateTime.now();
-      _foregroundOnlyLastExportAt = successAt;
-      await prefs.setLastLocationExportMs(successAt.millisecondsSinceEpoch);
+      if (await LocationSyncService().exportAllAndClearOnSuccess()) {
+        final successAt = DateTime.now();
+        _foregroundOnlyLastExportAt = successAt;
+        _foregroundOnlyLastExportAttemptAt = null;
+        await prefs.setLastLocationExportMs(successAt.millisecondsSinceEpoch);
+      }
+    } finally {
+      _foregroundOnlyExportInProgress = false;
     }
   }
 
@@ -352,7 +467,8 @@ class LocationBackgroundService {
 
   static Future<void> _ensureAndroidNotificationPermission() async {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
-    final permission = await FlutterForegroundTask.checkNotificationPermission();
+    final permission =
+        await FlutterForegroundTask.checkNotificationPermission();
     if (permission != NotificationPermission.granted) {
       await FlutterForegroundTask.requestNotificationPermission();
     }

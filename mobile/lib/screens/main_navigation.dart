@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../services/app_shell_navigation.dart';
 import '../services/location_background_service.dart';
+import '../services/tracking_diagnostics.dart';
 import '../services/location_service.dart';
 import 'glove_support_tab.dart';
 import 'home_tab.dart';
@@ -76,16 +77,18 @@ class _MainNavigationState extends State<MainNavigation>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    TrackingDiagnostics.log('lifecycle ${state.name}');
     if (state == AppLifecycleState.resumed) {
       unawaited(() async {
         await _promptAlwaysLocationIfNeeded();
         await LocationBackgroundService().resyncTrackingFromPreferences();
+        await _settingsPageKey.currentState?.refreshLocationPermissionState();
       }());
       return;
     }
 
-    // If we are not in the foreground, stop any foreground-only capture loop.
-    unawaited(LocationBackgroundService().stopForegroundOnlyTracking());
+    // Stop the capture loop unless it can run in the background.
+    unawaited(LocationBackgroundService().onAppLeftForeground());
   }
 
   /// Shown after login and whenever the app resumes until "Always" location is granted.

@@ -127,12 +127,30 @@ class LocationService {
     }
 
     try {
+      // Time-limited so a missing GPS fix cannot block later captures.
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 30),
         ),
       );
 
+      return await storePosition(position);
+    } catch (e) {
+      // Background jobs should not crash the app; callers may inspect the bool.
+      return false;
+    }
+  }
+
+  /// Stores an already obtained [position]. Returns true if a row was written.
+  Future<bool> storePosition(Position position) async {
+    final userKey = await AuthService().getUserKey();
+    if (userKey == null) {
+      // Logged out (or session not available): do not store anything.
+      return false;
+    }
+
+    try {
       debugPrint(
         'The Location details: ${position.latitude} ${position.longitude}',
       );
@@ -148,9 +166,7 @@ class LocationService {
       await LocationStorageService().insert(entry, userKey: userKey);
       return true;
     } catch (e) {
-      // Background jobs should not crash the app; callers may inspect the bool.
       return false;
     }
   }
 }
-

@@ -116,6 +116,16 @@ class LocationStorageService {
     return rows.map(LocationEntry.fromMap).toList();
   }
 
+  /// Deletes entries up to [maxId], keeping any stored after them.
+  Future<void> deleteThrough(int maxId, {required String userKey}) async {
+    final db = await _db;
+    await db.delete(
+      'locations',
+      where: 'user_key = ? AND id <= ?',
+      whereArgs: [userKey, maxId],
+    );
+  }
+
   Future<void> clearAll({required String userKey}) async {
     final db = await _db;
     await db.delete(
