@@ -174,7 +174,7 @@ class AuthService {
     final requestBody = <String, dynamic>{
       'full_name': name,
       'email': email,
-      'phoneNumber': phoneNumber,
+      if (phoneNumber.trim().isNotEmpty) 'phoneNumber': phoneNumber.trim(),
       'password': password,
       'role': userRoleToApiString(role),
       'height_cm': heightCm,
