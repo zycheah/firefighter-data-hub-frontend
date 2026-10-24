@@ -71,7 +71,6 @@ Details: [web/README.md](web/README.md)
 │   └── package.json        # Dependencies and scripts
 └── docs/
     ├── ARCHITECTURE.md     # How the system fits together
-    ├── ROADMAP.md          # Known issues and planned work
     ├── personal information requirement.pdf   # Data collection requirements
     └── ImageTrendFeatures.txt                 # Reference notes on fire reporting tools
 ```
@@ -125,7 +124,7 @@ When the web dashboard is hosted on its own domain, that domain must be listed i
    (cd mobile && flutter analyze && flutter test)
    ```
 
-   `npm run lint` currently reports two existing errors (item D7 in [docs/ROADMAP.md](docs/ROADMAP.md)). Do not add new ones.
+   `npm run lint` currently reports two existing errors. Do not add new ones.
 
 4. If an API request or response shape changes, update the matching backend endpoint and the backend's `docs/API.md` in the same change.
 
@@ -140,5 +139,4 @@ When the web dashboard is hosted on its own domain, that domain must be listed i
 | [mobile/README.md](mobile/README.md) | Mobile app setup, structure, configuration, release builds |
 | [web/README.md](web/README.md) | Web dashboard setup, structure, configuration, deployment |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, data flow, data model and authentication |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Known issues and planned work |
 | Backend `docs/API.md` | Full API reference |

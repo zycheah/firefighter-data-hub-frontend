@@ -65,7 +65,7 @@ npm run dev
 
 Open <http://localhost:5173>, register a researcher account and sign in.
 
-> **Known issue.** On a new local database, registration and sign-in fail until the `users_researcher` table exists. See item F2 in [../docs/ROADMAP.md](../docs/ROADMAP.md).
+> **Known issue.** On a new local database, registration and sign-in fail until the `users_researcher` table exists.
 
 ---
 
