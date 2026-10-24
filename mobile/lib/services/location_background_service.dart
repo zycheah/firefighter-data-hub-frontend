@@ -403,8 +403,15 @@ class LocationBackgroundService {
   }
 
   Future<void> _runCaptureAndMaybeExportForegroundOnly() async {
-    // Prefer the latest fix from the keep-alive stream.
-    final streamed = _iosKeepAlivePosition;
+    // Prefer the latest fix from the keep-alive stream, unless it is older than
+    // one interval (GPS signal lost): re-storing it would record a stale point.
+    var streamed = _iosKeepAlivePosition;
+    final maxAge = _foregroundOnlyInterval ?? const Duration(minutes: 1);
+    if (streamed != null &&
+        DateTime.now().difference(streamed.timestamp) > maxAge) {
+      TrackingDiagnostics.log('stream fix stale, using oneshot');
+      streamed = null;
+    }
     final bool stored;
     if (streamed != null) {
       stored = await LocationService().storePosition(streamed);
