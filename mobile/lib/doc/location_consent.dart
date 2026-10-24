@@ -1,6 +1,6 @@
 final Map<String, dynamic> locationAccessContent = {
   "screen_title": "Location Access for Research",
-  "description": "Firefighter Safety Data Hub collects location data to enable the tracking of firefighter environmental exposure and duty-related movements even when the app is closed or not in use.",
+  "description": "SmokeRead collects location data to enable the tracking of firefighter environmental exposure and duty-related movements even when the app is closed or not in use.",
   "usage_section": {
     "title": "How we use this data:",
     "details": [

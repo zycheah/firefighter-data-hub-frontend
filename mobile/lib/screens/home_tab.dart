@@ -91,7 +91,7 @@ class _HomeTabState extends State<HomeTab> {
               )
             else
               const Text(
-                'Welcome to Firefighter Safety Data Hub',
+                'Welcome to SmokeRead',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.grey,

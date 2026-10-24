@@ -84,7 +84,7 @@ class LocationBackgroundService {
 
   factory LocationBackgroundService() => _instance;
 
-  static const String _notificationTitle = 'Firefighter Safety Tracker';
+  static const String _notificationTitle = 'SmokeRead';
   static const String _notificationText =
       'Recording your location for safety monitoring';
 
