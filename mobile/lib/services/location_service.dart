@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../models/location_entry_model.dart';
 import 'auth_service.dart';
+import 'location_preferences_service.dart';
 import 'location_storage_service.dart';
 
 class LocationService {
@@ -158,12 +159,16 @@ class LocationService {
       final entry = LocationEntry(
         latitude: position.latitude,
         longitude: position.longitude,
-        timestamp: DateTime.now().toUtc(),
+        // When the fix was taken, not when it was stored.
+        timestamp: position.timestamp.toUtc(),
         accuracy: position.accuracy,
         altitude: position.altitude,
       );
 
       await LocationStorageService().insert(entry, userKey: userKey);
+      await LocationPreferencesService().setLastLocationCaptureMs(
+        DateTime.now().millisecondsSinceEpoch,
+      );
       return true;
     } catch (e) {
       return false;

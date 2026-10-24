@@ -9,12 +9,11 @@ class LocationPreferencesService {
   LocationPreferencesService._internal();
 
   static const _trackingEnabledKey = 'location_tracking_enabled';
-  static const _trackingIntervalMinutesKey =
-      'location_tracking_interval_minutes';
   static const _exportIntervalMinutesKey = 'location_export_interval_minutes';
   static const _lastLocationExportMsKey = 'last_location_export_ms';
+  static const _lastLocationCaptureMsKey = 'last_location_capture_ms';
 
-  /// Default settings: tracking enabled, every minute.
+  /// Location is recorded every minute; the interval is not user-configurable.
   static const int defaultTrackingIntervalMinutes = 1;
   static const bool defaultTrackingEnabled = true;
 
@@ -32,19 +31,9 @@ class LocationPreferencesService {
     await prefs.setBool(_trackingEnabledKey, value);
   }
 
-  Future<int> getTrackingIntervalMinutes() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_trackingIntervalMinutesKey) ??
-        defaultTrackingIntervalMinutes;
-  }
-
-  Future<void> setTrackingIntervalMinutes(int minutes) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      _trackingIntervalMinutesKey,
-      minutes.clamp(1, 24 * 60),
-    );
-  }
+  /// Fixed interval; any value saved by earlier app versions is ignored.
+  Future<int> getTrackingIntervalMinutes() async =>
+      defaultTrackingIntervalMinutes;
 
   Future<int> getExportIntervalMinutes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -64,6 +53,17 @@ class LocationPreferencesService {
   Future<int?> getLastLocationExportMs() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_lastLocationExportMsKey);
+  }
+
+  Future<int?> getLastLocationCaptureMs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    return prefs.getInt(_lastLocationCaptureMsKey);
+  }
+
+  Future<void> setLastLocationCaptureMs(int ms) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastLocationCaptureMsKey, ms);
   }
 
   Future<void> setLastLocationExportMs(int ms) async {

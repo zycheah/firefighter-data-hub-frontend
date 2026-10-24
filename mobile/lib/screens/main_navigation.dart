@@ -6,9 +6,9 @@ import '../services/app_shell_navigation.dart';
 import '../services/location_background_service.dart';
 import '../services/tracking_diagnostics.dart';
 import '../services/location_service.dart';
+import 'ai_assistant_page.dart';
 import 'glove_support_tab.dart';
 import 'home_tab.dart';
-import 'location_history_page.dart';
 import 'location_onboarding_page.dart';
 import 'log_event_tab.dart';
 import 'ppe_page.dart';
@@ -129,7 +129,7 @@ class _MainNavigationState extends State<MainNavigation>
     const LogEventTab(),
     PPEPage(key: _ppePageKey),
     const GloveSupportTab(),
-    const LocationHistoryPage(),
+    const AiAssistantPage(),
     const SmokeSamplerPage(),
   ];
 
@@ -225,7 +225,7 @@ void _showAppMenu() {
                     _buildAppBox(Icons.event_note, 'Log Event', 2),
                     _buildAppBox(Icons.shield, 'PPE', 3),
                     _buildAppBox(Icons.support, 'Glove Support', 4),
-                    _buildAppBox(Icons.location_on, 'Location\nHistory', 5),
+                    _buildAppBox(Icons.smart_toy_outlined, 'AI\nAssistant', 5),
                     _buildAppBox(Icons.science, 'Smoke\npassive\nSampling', 6),
                   ],
                 ),

@@ -31,10 +31,6 @@ class SettingsPageState extends State<SettingsPage>
   bool _requestingAllTheTimeLocation = false;
   bool _highlightEnableAllTheTimeButton = false;
   Timer? _enableButtonHighlightTimer;
-  int _trackingIntervalMinutes =
-      LocationPreferencesService.defaultTrackingIntervalMinutes;
-
-  final List<int> _intervalOptions = [1, 5, 15, 20, 30, 60, 120];
 
   @override
   void initState() {
@@ -99,14 +95,11 @@ class SettingsPageState extends State<SettingsPage>
   }
 
   Future<void> _loadPreferences() async {
-    final prefs = LocationPreferencesService();
-    final interval = await prefs.getTrackingIntervalMinutes();
     final always = await LocationService().hasAllTheTimeLocationAccess();
     final anyFg = await LocationService().hasAnyLocationPermission();
 
     if (!mounted) return;
     setState(() {
-      _trackingIntervalMinutes = interval;
       _allTheTimeLocationEnabled = always;
       _anyForegroundLocationGranted = anyFg;
       _isLoadingPreferences = false;
@@ -175,22 +168,6 @@ class SettingsPageState extends State<SettingsPage>
     if (open == true) {
       await openAppSettings();
     }
-  }
-
-  Future<void> _onTrackingIntervalChanged(int? value) async {
-    if (value == null) return;
-
-    final prefs = LocationPreferencesService();
-    await prefs.setTrackingIntervalMinutes(value);
-
-    setState(() {
-      _trackingIntervalMinutes = value;
-    });
-
-    await LocationBackgroundService().updateScheduling(
-      isEnabled: true,
-      intervalMinutes: _trackingIntervalMinutes,
-    );
   }
 
   @override
@@ -475,28 +452,9 @@ class SettingsPageState extends State<SettingsPage>
                   ),
                 )
               else ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Tracking interval (minutes)',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    DropdownButton<int>(
-                      value: _intervalOptions.contains(_trackingIntervalMinutes)
-                          ? _trackingIntervalMinutes
-                          : _intervalOptions.first,
-                      items: _intervalOptions
-                          .map(
-                            (m) => DropdownMenuItem<int>(
-                              value: m,
-                              child: Text(m.toString()),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: _onTrackingIntervalChanged,
-                    ),
-                  ],
+                const Text(
+                  'Location is recorded every minute.',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -521,15 +479,15 @@ class SettingsPageState extends State<SettingsPage>
                 ),
                 const SizedBox(height: 6),
                 _bulletLine(
-                  'Periodic check-ins for safety and incident-related location history.',
+                  'Location is recorded regularly for the firefighter exposure study.',
                 ),
                 _bulletLine(
                   '“While using the app” is not permission to keep locating you when the app '
                   'is not active—Always / Allow all the time is.',
                 ),
                 _bulletLine(
-                  'Tap Enable all-the-time location below and confirm Always (iOS) or Allow '
-                  'all the time (Android) when the system prompts.',
+                  'Background recording requires Always (iOS) or Allow all the time '
+                  '(Android). You can change this at any time.',
                 ),
                 if (!_allTheTimeLocationEnabled &&
                     _anyForegroundLocationGranted) ...[

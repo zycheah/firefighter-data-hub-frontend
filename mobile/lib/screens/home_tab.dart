@@ -4,8 +4,9 @@ import '../services/auth_service.dart';
 import '../services/event_service.dart';
 import '../services/ppe_service.dart';
 import 'log_event_tab.dart';
-import 'location_history_page.dart';
+import 'ai_assistant_page.dart';
 import 'ppe_page.dart';
+import 'tracking_status_card.dart';
 import 'package:intl/intl.dart';
 
 class HomeTab extends StatefulWidget {
@@ -38,11 +39,10 @@ class _HomeTabState extends State<HomeTab> {
     setState(() {}); // Refresh to show updated PPE data
   }
 
-  Future<void> _navigateToLocationHistory() async {
+  Future<void> _navigateToAiAssistant() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const LocationHistoryPage()),
+      MaterialPageRoute(builder: (context) => const AiAssistantPage()),
     );
-    setState(() {}); // Refresh to show updated location data
   }
 
   @override
@@ -97,7 +97,9 @@ class _HomeTabState extends State<HomeTab> {
                   color: Colors.grey,
                 ),
               ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 24),
+            const TrackingStatusCard(),
+            const SizedBox(height: 24),
             // Card 1: Last Event
             Card(
               elevation: 4,
@@ -194,7 +196,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
             const SizedBox(height: 24),
-            // Card 3: Location History
+            // Card 3: AI Assistant
             Card(
               elevation: 4,
               child: Padding(
@@ -203,7 +205,7 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Location History',
+                      'AI Assistant',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -211,7 +213,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'View up to the last 10 recorded locations.',
+                      'Coming soon in a future update.',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
@@ -221,11 +223,11 @@ class _HomeTabState extends State<HomeTab> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _navigateToLocationHistory,
+                        onPressed: _navigateToAiAssistant,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('View Location History'),
+                        child: const Text('Learn More'),
                       ),
                     ),
                   ],
