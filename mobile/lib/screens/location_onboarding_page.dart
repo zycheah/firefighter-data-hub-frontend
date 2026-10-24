@@ -135,14 +135,12 @@ class _LocationOnboardingPageState extends State<LocationOnboardingPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Your safety features rely on periodic GPS updates. When the '
-                        'phone locks or you switch apps, iOS and Android only allow '
-                        'that if location is set to Always (iOS) or Allow all the '
-                        'time (Android). If you only allowed location while using '
-                        'the app, tracking can stop in the background even though it '
-                        'looks like GPS is “on”. Turning on all-the-time location in '
-                        'our settings lets the system grant what we need for continuous '
-                        'protection, subject to your choices and platform rules.',
+                        'The research study records your location regularly, including '
+                        'when the app is in the background. iOS and Android only allow '
+                        'this when location access is set to Always (iOS) or Allow all '
+                        'the time (Android). With "While Using the App", recording '
+                        'stops when the app is not on screen. You can change this at any '
+                        'time in your device settings.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               height: 1.42,
                               color: Colors.black87,
@@ -157,17 +155,16 @@ class _LocationOnboardingPageState extends State<LocationOnboardingPage> {
                       ),
                       const SizedBox(height: 10),
                       _bulletLine(
-                        'Why: Periodic check-ins for safety and incident-related '
-                        'location history.',
+                        'Why: Location is recorded regularly so researchers can study '
+                        'firefighter exposure during shifts.',
                       ),
                       _bulletLine(
                         'Why not “only while using”: The OS does not treat that as '
                         'permission to keep locating you when the app isn’t active.',
                       ),
                       _bulletLine(
-                        'What to do: Open GPS Preferences and tap Enable all-the-time '
-                        'location, then confirm in any system prompts (Always / Allow '
-                        'all the time).',
+                        'How to change it: Open GPS Preferences and tap Enable '
+                        'all-the-time location. The choice is yours.',
                       ),
                       if (!_loadingPermissionHint &&
                           _showPermissionGrantedClarifier) ...[
@@ -186,10 +183,9 @@ class _LocationOnboardingPageState extends State<LocationOnboardingPage> {
                       ],
                       const SizedBox(height: 22),
                       Text(
-                        'To keep recording your location when the app is in the '
-                        'background, please go to Settings → GPS Preferences and tap '
-                        'Enable all-the-time location. If the system asks, choose '
-                        'Always (iOS) or Allow all the time (Android).',
+                        'Background recording is available when location access is '
+                        'set to Always (iOS) or Allow all the time (Android). You can '
+                        'change this in Settings → GPS Preferences.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               height: 1.42,
                               fontWeight: FontWeight.w600,

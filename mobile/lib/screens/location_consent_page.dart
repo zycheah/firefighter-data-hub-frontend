@@ -133,12 +133,12 @@ class _LocationConsentPageState extends State<LocationConsentPage> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('I Accept'),
+                      : const Text('Continue'),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(
                   onPressed: _busy ? null : _onRefuse,
-                  child: const Text('I Refuse'),
+                  child: const Text('Not Now'),
                 ),
               ],
             ),
