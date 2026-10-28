@@ -5,7 +5,7 @@ final Map<String, dynamic> researchConsentContent = {
     "details": [
       {
         "label": "Identity & Contact:",
-        "content": "Full name, phone number, and email address."
+        "content": "Full name, email address, and phone number (optional)."
       },
       {
         "label": "Professional Profile:",
@@ -27,6 +27,6 @@ final Map<String, dynamic> researchConsentContent = {
   },
   "sharing_section": {
     "title": "Sharing:",
-    "content": "Your data is transmitted to secure university servers and is not shared with any third-party commercial entities."
+    "content": "Your data is transmitted over an encrypted connection to the research study's secure servers and is not shared with any third-party commercial entities."
   }
 };
