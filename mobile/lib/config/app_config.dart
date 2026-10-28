@@ -10,7 +10,7 @@ class AppConfig {
   /// iOS **simulator** / desktop → backend on same machine.
   static const String baseUrlLoopback = 'http://127.0.0.1:$port';
 
-  static const String baseUrl_aws = 'http://98.90.107.205:8000';
+  static const String baseUrl_aws = 'https://api.smokeread.com';
 
   /// `true` = AWS load balancer. `false` = local backend (URL depends on platform).
   static const bool useAwsBackend = true;

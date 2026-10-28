@@ -5,7 +5,7 @@ import { ROUTES } from '@/constants/routes'
 import type { RefreshTokenResponse } from '@/types/auth.types'
 
 /** Local API: original app default was port 8080 (not uvicorn's 8000). In dev, use Vite proxy same-origin path to avoid CORS. */
-const baseURL = //'http://98.90.107.205:8000/api/v1/web_api';
+const baseURL = //'https://api.smokeread.com/api/v1/web_api';
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ||
   (import.meta.env.DEV ? '/api/v1/web_api' : 'http://localhost:8080/api/v1/web_api')
 
