@@ -27,7 +27,7 @@ final Map<String, dynamic> researchConsentContent = {
   },
   "purpose_section": {
     "title": "How Your Data Is Used:",
-    "content": "To provide the app's features, and by authorized members of the Iowa State University team for research and development to improve firefighter safety."
+    "content": "To provide the app's features, and by authorized team members for research and development to improve firefighter safety."
   },
   "sharing_section": {
     "title": "Sharing:",

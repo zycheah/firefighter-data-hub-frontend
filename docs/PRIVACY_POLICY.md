@@ -4,7 +4,7 @@ Last updated: October 28, 2026
 
 ## 1. About this app
 
-SmokeRead is a mobile app that helps firefighters record incidents, their personal protective equipment (PPE), passive smoke sampling results, and their location during work. The data may be analyzed by authorized members of the Iowa State University team for research and development to improve firefighter safety.
+SmokeRead is a mobile app that helps firefighters record incidents, their personal protective equipment (PPE), passive smoke sampling results, and their location during work. The data may be analyzed by authorized team members for research and development to improve firefighter safety.
 
 This policy explains what the app collects, how it is used, and the choices you have.
 
@@ -34,7 +34,7 @@ We do not collect contacts, photos, health records from other apps, or advertisi
 
 ## 3. How we use your information
 
-- For research and development: authorized members of the Iowa State University team analyze location, incident, PPE and smoke sampling data to improve firefighter safety.
+- For research and development: authorized team members analyze location, incident, PPE and smoke sampling data to improve firefighter safety.
 - To manage your account: sign-in, email verification and password changes.
 - To send account emails: verification codes, sign-in notifications, password change notices and account deletion confirmations.
 
@@ -45,7 +45,7 @@ We do not use your information for advertising and we do not sell it.
 We do not sell your personal information, and we do not share it with advertisers or data brokers. We may share your information only in the following circumstances:
 
 ### 4.1 With authorized personnel
-Your data may be accessed by authorized members of the Iowa State University team for research and development purposes, through a password-protected dashboard.
+Your data may be accessed by authorized team members for research and development purposes, through a password-protected dashboard.
 
 ### 4.2 With service providers
 We may share data with trusted third-party service providers who help operate the app, such as data storage and email services, under strict confidentiality agreements.

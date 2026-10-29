@@ -14,7 +14,7 @@ final Map<String, dynamic> locationAccessContent = {
       },
       {
         "label": "Purpose",
-        "content": "Location data helps the Iowa State University team analyze firefighter exposure during work, for research and development to improve firefighter safety."
+        "content": "Location data is used to analyze firefighter exposure during work, for research and development to improve firefighter safety."
       }
     ]
   },
