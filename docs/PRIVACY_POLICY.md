@@ -4,7 +4,7 @@ Last updated: October 28, 2026
 
 ## 1. About this app
 
-SmokeRead is a mobile app used for a firefighter exposure research study at Iowa State University. It lets firefighters record incidents, their personal protective equipment (PPE), passive smoke sampling results, and their location, so researchers can study firefighter exposure during work.
+SmokeRead is a mobile app that helps firefighters record incidents, their personal protective equipment (PPE), passive smoke sampling results, and their location during work. The data may be analyzed by authorized members of the Iowa State University team for research and development to improve firefighter safety.
 
 This policy explains what the app collects, how it is used, and the choices you have.
 
@@ -16,7 +16,7 @@ This policy explains what the app collects, how it is used, and the choices you 
 - Phone number, if you choose to provide it (optional).
 
 **Profile information** (entered at sign-up)
-- Gender (optional), race, ethnicity (optional) and year of birth.
+- Gender, race, ethnicity and year of birth (all optional).
 - Height, weight and dominant hand.
 - Firefighting status, type of firefighting, years of experience, fire station name, and the city and state where you work as a firefighter.
 
@@ -34,7 +34,7 @@ We do not collect contacts, photos, health records from other apps, or advertisi
 
 ## 3. How we use your information
 
-- To run the research study: researchers analyse location, incident, PPE and smoke sampling data to study firefighter exposure.
+- For research and development: authorized members of the Iowa State University team analyze location, incident, PPE and smoke sampling data to improve firefighter safety.
 - To manage your account: sign-in, email verification and password changes.
 - To send account emails: verification codes, sign-in notifications, password change notices and account deletion confirmations.
 
@@ -45,7 +45,7 @@ We do not use your information for advertising and we do not sell it.
 We do not sell your personal information, and we do not share it with advertisers or data brokers. We may share your information only in the following circumstances:
 
 ### 4.1 With authorized personnel
-Your data may be accessed by authorized members of the Iowa State University research team for research purposes, through a password-protected research dashboard.
+Your data may be accessed by authorized members of the Iowa State University team for research and development purposes, through a password-protected dashboard.
 
 ### 4.2 With service providers
 We may share data with trusted third-party service providers who help operate the app, such as data storage and email services, under strict confidentiality agreements.
@@ -60,7 +60,7 @@ Your information is stored on servers and a database provided by Amazon Web Serv
 ## 6. How we protect your information
 
 - Passwords are stored in hashed form.
-- Access to the research dashboard requires a researcher account.
+- Access to the team dashboard requires an approved account.
 - Data sent between the app and our servers is encrypted in transit using HTTPS.
 
 ## 7. How long we keep your information

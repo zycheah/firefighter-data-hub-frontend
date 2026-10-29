@@ -64,47 +64,37 @@ class _UserConsentPageState extends State<UserConsentPage> {
       child: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Icon(
                   Icons.verified_user,
-                  size: 56,
+                  size: 36,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Requirement: all consent text must fit on one page without scrolling.
-                      // We scale down the consent content if needed to fit smaller screens.
-                      return FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.topLeft,
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: _ConsentBody(
-                            dataTitle: dataTitle,
-                            dataDetails: dataDetails,
-                            purposeTitle: purposeTitle,
-                            purposeContent: purposeContent,
-                            sharingTitle: sharingTitle,
-                            sharingContent: sharingContent,
-                          ),
-                        ),
-                      );
-                    },
+                  child: SingleChildScrollView(
+                    child: _ConsentBody(
+                      dataTitle: dataTitle,
+                      dataDetails: dataDetails,
+                      purposeTitle: purposeTitle,
+                      purposeContent: purposeContent,
+                      sharingTitle: sharingTitle,
+                      sharingContent: sharingContent,
+                    ),
                   ),
                 ),
+                const SizedBox(height: 12),
                 if (_refuseCount > 0) ...[
                   Text(
                     'User must provide the consent inorder to user app',
@@ -164,18 +154,18 @@ class _ConsentBody extends StatelessWidget {
       children: [
         if (dataTitle.isNotEmpty) ...[
           _SectionTitle(text: dataTitle),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
         ],
         ...dataDetails.map(
           (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.only(bottom: 6.0),
             child: _LabeledBullet(
               label: (item['label'] as String?) ?? '',
               content: (item['content'] as String?) ?? '',
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         if (purposeTitle.isNotEmpty) ...[
           _SectionTitle(text: purposeTitle),
           const SizedBox(height: 6),
@@ -183,9 +173,9 @@ class _ConsentBody extends StatelessWidget {
         if (purposeContent.isNotEmpty)
           Text(
             purposeContent,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         if (sharingTitle.isNotEmpty) ...[
           _SectionTitle(text: sharingTitle),
           const SizedBox(height: 6),
@@ -193,7 +183,7 @@ class _ConsentBody extends StatelessWidget {
         if (sharingContent.isNotEmpty)
           Text(
             sharingContent,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
       ],
     );
@@ -230,14 +220,11 @@ class _LabeledBullet extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 6.0),
-          child: Text('• '),
-        ),
+        Text('•  ', style: Theme.of(context).textTheme.bodyMedium),
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyMedium,
               children: [
                 if (effectiveLabel.isNotEmpty)
                   TextSpan(

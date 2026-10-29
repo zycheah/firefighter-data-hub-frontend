@@ -1,6 +1,6 @@
 # SmokeRead Support
 
-SmokeRead is used for a firefighter exposure research study at Iowa State University. It records incidents, PPE equipment, passive smoke sampling results and your location during work.
+SmokeRead helps firefighters record their work for firefighter safety research and development by the Iowa State University team. It records incidents, PPE equipment, passive smoke sampling results and your location during work.
 
 ## Getting started
 

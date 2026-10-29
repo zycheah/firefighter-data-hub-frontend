@@ -479,7 +479,7 @@ class SettingsPageState extends State<SettingsPage>
                 ),
                 const SizedBox(height: 6),
                 _bulletLine(
-                  'Location is recorded regularly for the firefighter exposure study.',
+                  'Location is recorded regularly to analyze firefighter exposure during work.',
                 ),
                 _bulletLine(
                   '“While using the app” is not permission to keep locating you when the app '

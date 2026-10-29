@@ -10,6 +10,8 @@ class ConsentPreferencesService {
 
   static const String _userConsentAcceptedKey = 'user_consent_accepted';
   static const String _locationConsentAcceptedKey = 'location_consent_accepted';
+  static const String _alwaysLocationPromptShownKey =
+      'always_location_prompt_shown';
 
   Future<bool> getUserConsentAccepted() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,6 +31,17 @@ class ConsentPreferencesService {
   Future<void> setLocationConsentAccepted(bool accepted) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_locationConsentAcceptedKey, accepted);
+  }
+
+  /// Whether the "Always" location prompt has already been shown on this device.
+  Future<bool> getAlwaysLocationPromptShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_alwaysLocationPromptShownKey) ?? false;
+  }
+
+  Future<void> setAlwaysLocationPromptShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_alwaysLocationPromptShownKey, true);
   }
 }
 

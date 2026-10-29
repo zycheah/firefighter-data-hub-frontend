@@ -135,7 +135,7 @@ class _LocationOnboardingPageState extends State<LocationOnboardingPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'The research study records your location regularly, including '
+                        'SmokeRead records your location regularly, including '
                         'when the app is in the background. iOS and Android only allow '
                         'this when location access is set to Always (iOS) or Allow all '
                         'the time (Android). With "While Using the App", recording '
@@ -155,8 +155,8 @@ class _LocationOnboardingPageState extends State<LocationOnboardingPage> {
                       ),
                       const SizedBox(height: 10),
                       _bulletLine(
-                        'Why: Location is recorded regularly so researchers can study '
-                        'firefighter exposure during shifts.',
+                        'Why: Location is recorded regularly to analyze firefighter '
+                        'exposure during work.',
                       ),
                       _bulletLine(
                         'Why not “only while using”: The OS does not treat that as '

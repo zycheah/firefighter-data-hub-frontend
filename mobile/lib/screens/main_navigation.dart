@@ -3,18 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/app_shell_navigation.dart';
+import '../services/consent_preferences_service.dart';
 import '../services/location_background_service.dart';
 import '../services/tracking_diagnostics.dart';
 import '../services/location_service.dart';
 import 'ai_assistant_page.dart';
 import 'glove_support_tab.dart';
 import 'home_tab.dart';
-import 'location_onboarding_page.dart';
 import 'log_event_tab.dart';
 import 'ppe_page.dart';
 import 'settings_page.dart';
 import 'smoke_sampler_page.dart';
-import 'location_consent_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -91,26 +90,19 @@ class _MainNavigationState extends State<MainNavigation>
     unawaited(LocationBackgroundService().onAppLeftForeground());
   }
 
-  /// Shown after login and whenever the app resumes until "Always" location is granted.
+  /// Shows the system location permission pop-ups once per device; afterwards
+  /// the home screen status card and GPS Preferences let the user change it.
   Future<void> _promptAlwaysLocationIfNeeded() async {
     if (_locationPromptRouteOpen) return;
     if (!mounted) return;
     if (await LocationService().hasAllTheTimeLocationAccess()) return;
-    if (!mounted) return;
+    final consentPrefs = ConsentPreferencesService();
+    if (await consentPrefs.getAlwaysLocationPromptShown()) return;
+    await consentPrefs.setAlwaysLocationPromptShown();
 
     _locationPromptRouteOpen = true;
     try {
-      final ok = await showLocationConsentIfNeeded(
-        context,
-        hasOsLocationPermission: () => LocationService().hasAnyLocationPermission(),
-      );
-      if (!ok || !mounted) return;
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
-          fullscreenDialog: true,
-          builder: (context) => const LocationOnboardingPage(),
-        ),
-      );
+      await LocationService().requestAllTheTimeLocationAccess();
       await LocationBackgroundService().resyncTrackingFromPreferences();
     } finally {
       _locationPromptRouteOpen = false;

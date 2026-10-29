@@ -1,7 +1,7 @@
 final Map<String, dynamic> researchConsentContent = {
-  "screen_title": "Research Data Collection & Consent",
+  "screen_title": "Data Collection & Consent",
   "data_collection_section": {
-    "title": "To participate in the Iowa State University Firefighter Research Study, this app collects and stores the following sensitive information:",
+    "title": "SmokeRead collects and stores the following information:",
     "details": [
       {
         "label": "Identity & Contact:",
@@ -9,7 +9,7 @@ final Map<String, dynamic> researchConsentContent = {
       },
       {
         "label": "Professional Profile:",
-        "content": "Firefighter occupation status and years of experience."
+        "content": "Firefighter status, experience, and station."
       },
       {
         "label": "Physical Attributes:",
@@ -17,16 +17,20 @@ final Map<String, dynamic> researchConsentContent = {
       },
       {
         "label": "Demographics (Optional):",
-        "content": "Birth year, age, race, and ethnicity."
+        "content": "Birth year, race, gender, and ethnicity."
+      },
+      {
+        "label": "Activity:",
+        "content": "Location while recording is on, and the data you enter."
       }
     ]
   },
   "purpose_section": {
-    "title": "Purpose of Collection:",
-    "content": "This data is used exclusively by researchers at Iowa State University to study the long-term impacts of firefighting on health and safety. This data may be stored and analyzed for the duration of the multi-year research project."
+    "title": "How Your Data Is Used:",
+    "content": "To provide the app's features, and by authorized members of the Iowa State University team for research and development to improve firefighter safety."
   },
   "sharing_section": {
     "title": "Sharing:",
-    "content": "Your data is transmitted over an encrypted connection to the research study's secure servers and is not shared with any third-party commercial entities."
+    "content": "Your data is sent over an encrypted connection to secure servers and is never sold or shared with advertisers. By tapping I Accept, you agree to the Privacy Policy (smokeread.com/privacy)."
   }
 };

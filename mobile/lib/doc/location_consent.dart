@@ -1,5 +1,5 @@
 final Map<String, dynamic> locationAccessContent = {
-  "screen_title": "Location Access for Research",
+  "screen_title": "Location Access",
   "description": "SmokeRead collects location data to enable the tracking of firefighter environmental exposure and duty-related movements, including while the app is running in the background.",
   "usage_section": {
     "title": "How we use this data:",
@@ -10,11 +10,11 @@ final Map<String, dynamic> locationAccessContent = {
       },
       {
         "label": "Sync",
-        "content": "Data is uploaded over an encrypted connection to the research study's secure servers about every 15 minutes."
+        "content": "Data is uploaded over an encrypted connection to secure servers about every 15 minutes."
       },
       {
         "label": "Purpose",
-        "content": "This data is critical for the long-term study of firefighter safety and health outcomes over several years."
+        "content": "Location data helps the Iowa State University team analyze firefighter exposure during work, for research and development to improve firefighter safety."
       }
     ]
   },
